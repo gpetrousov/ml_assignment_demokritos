@@ -1,9 +1,5 @@
 # 2.0 Course - Machine Learning assignment
 
-Figure out a topic for the assignment.
-
-# Topic types
-
 Topics are based on the learning types.
 
 ![[Pasted image 20251111132201.png]]
@@ -15,17 +11,16 @@ Topics are based on the learning types.
 
 - Use data from ErgastAPI (fastf1) - pulls data from the official F1 systems
 - Inject weather data?
-
+- Correlate with videos which show overtake or not.
 
 #### 2. Regression Project: Predicting Pit Stop Duration ⏱️
 
 - Goal: Predict the total duration of a pit stop (in seconds) based on pre-stop conditions.
-
+- Correlate with videos which pit stops.
 
 #### 3. Clustering Project: Unsupervised Strategy Analysis 🧩
 
 - Use KNN to identify distinct strategies used by the teams for a race.
-- Not sure about scale
 
 
 #### 4. Music genre classification + PCA 🎵
@@ -33,29 +28,32 @@ Topics are based on the learning types.
 - Algos: Random Forest, SVM
 - Connects well with PCA to reduce features
 - Dataset: https://www.kaggle.com/datasets/carlthome/gtzan-genre-collection
-- Easy to compare
-- Involves signal analysis and comprehension
 
 
 # Potential topics - UNsupervised
 
-Use Q-learning (algorithm) in the following projects:
+Use Q-learning and SARSA (algorithms) in the following projects:
 
 #### 1. Classic cart pole problem _|_
+
+- add random collisions to the cart
+- inject wind conditions to shift the pole
+- inject gravity variation
 
 https://gymnasium.farama.org/environments/classic_control/cart_pole/
 
 
-#### 2. Play tetris 🕹️
+#### 3. Humanoid walking 🤖
 
-https://ale.farama.org/environments/tetris/
-
-
-#### 3. Humanoid walking
-
-https://gymnasium.farama.org/environments/mujoco/humanoid/
+Teach a humanoid to walk to a point in a 2D environment.
+- add a marker where the humanoid must walk to
+- inject gravity differentiation
+- add obstacles
 
 
-### Q-learning algo
+#### 4. Catch the ball with... a twist 🌀
 
-https://www.geeksforgeeks.org/machine-learning/q-learning-in-python/
+2D environment in which an agent is trying to learn to catch a ball.
+- add physics
+- inject multiple agents
+- add human player
