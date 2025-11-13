@@ -2,7 +2,7 @@
 
 Topics are based on the learning types.
 
-![[Pasted image 20251111132201.png]]
+![Types](assets/types.png)
 
 
 # Potential topics - Supervised
