@@ -77,7 +77,6 @@ def fetch_season_race_codes(year: int) ->pd.Series:
     """
     Returns the race codes for a season given the year.
     """
-    year = 2024
     event_schedule = fastf1.get_event_schedule(year)
     season_race_codes = event_schedule.iloc[1:, 0]
     return season_race_codes
@@ -112,7 +111,7 @@ def build_pit_stop_data_for_year_range(start_year: int, end_year: int) -> pd.Dat
             season_df = create_pit_stop_times_dataframe_for_a_season(year, season_race_codes)
             logger.info("====> Done <====")
 
-            all_years_data.append(yearly_df)
+            all_years_data.append(season_df)
             print(f"Successfully processed {year}. Total pit stops collected: {len(season_df)}")
         except Exception as e:
             print(f"ERROR processing year {year}: {e}")
