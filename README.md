@@ -1,5 +1,7 @@
 # Team SGD Machine Learning assignment
 
+Proposals: https://drive.google.com/drive/folders/1KCzNR4mxJCMpJDNw9fguZJJfahz9aPc1?usp=sharing
+
 ## Project 1: Predicting Pit Stop Duration ⏱️
 
 - Goal: Predict the total duration of a pit stop (in seconds) based on pre-stop conditions.
