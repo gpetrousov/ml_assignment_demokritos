@@ -6,6 +6,9 @@
 - Correlate with pit stop videos.
 
 
+## Directory: `f1_assignment`
+
+
 ### Goals outline
 
 #### Primary
@@ -27,3 +30,4 @@
 - [ ] Library which builds the `DataFrame` on top of `fastF1`.
 - [ ] Find properties affecting accuracy the most.
 - [ ] Compare results to a neural network.
+
