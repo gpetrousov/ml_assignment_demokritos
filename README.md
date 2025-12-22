@@ -1,74 +1,29 @@
-# Team SGD Machine Learning assignment candidates
+# Team SGD Machine Learning assignment
 
-Topics are based on the learning types.
-
-![Types](assets/types.png)
-
-
-# Potential topics - Supervised
-
-#### 1. Binary Classification : Predicting Overtaking Difficulty in F1 🚥
-
-- Use data from ErgastAPI (fastf1) - pulls data from the official F1 systems
-- Inject weather data?
-- Correlate with videos which show overtake or not.
-
-#### 2. Regression Project: Predicting Pit Stop Duration ⏱️
+## Project 1: Predicting Pit Stop Duration ⏱️
 
 - Goal: Predict the total duration of a pit stop (in seconds) based on pre-stop conditions.
-- Correlate with videos which pit stops.
-
-#### 3. Music genre classification + PCA 🎵
-
-- Algos: Random Forest, SVM
-- Connects well with PCA to reduce features
-- Dataset: https://www.kaggle.com/datasets/carlthome/gtzan-genre-collection
+- Correlate with pit stop videos.
 
 
-#### 7. Clustering Project: Unsupervised F1 Strategy Analysis 🧩
+### Goals outline
 
-- Use KNN to identify distinct F1 strategies used by the teams for a race.
+#### Primary
 
+- [ ] Library to build `DataFrame` for GP races
+- [ ] Library to add race telemetry to `DataFrame`
+- [ ] Regression model for all GP races concatenated
+- [ ] Regression model per GP race
+- [ ] Regression model per team (for a F1 strategist)
 
-# ~~Potential topics - UNsupervised~~
+#### Secondaries - Exploratory
 
-~~Use Q-learning and SARSA (algorithms) in the following projects:~~
+- [ ] Train Forest model for pit stop timeframe classification
+- [ ] Train a neural net and correlate with statistical model
 
-#### ~~4. Classic cart pole problem _|_~~
+#### Outcomes
 
-~~- add random collisions to the cart~~
-~~- inject wind conditions to shift the pole~~
-~~- inject gravity variation~~
-
-~~https://gymnasium.farama.org/environments/classic_control/cart_pole/~~
-
-
-#### ~~5. Humanoid walking 🤖~~
-
-~~Teach a humanoid to walk to a point in a 2D environment.~~
-~~- add a marker where the humanoid must walk to~~
-~~- inject gravity differentiation~~
-~~- add obstacles~~
-
-
-#### ~~6. Catch the ball with... a twist 🌀~~
-
-~~2D environment in which an agent is trying to learn to catch a ball.~~
-~~- add physics~~
-~~- inject multiple agents~~
-~~- add human player~~
-
-
-# Team SGD Way of Working - WoW
-
-![WoW](assets/team_sgd_1.png)
-
-Thanks for your interest to join team SGD (Stochastic Gradient Descent). Here we'd like to introduce a WoW to avoid future disagreements.
-
-- We write all our content in English.
-- Report is writen using LaTeX.
-- Collaboration is asynchronous via Github, Google Drive, ...
-
-## Want to collaborate?
-
-Just open a PR with the topic of your interest, or come chat with me at the lectures.
+- [ ] Attempt to predict pit stop time accuracy as close as possible.
+- [ ] Library which builds the `DataFrame` on top of `fastF1`.
+- [ ] Find properties affecting accuracy the most.
+- [ ] Compare results to a neural network.
