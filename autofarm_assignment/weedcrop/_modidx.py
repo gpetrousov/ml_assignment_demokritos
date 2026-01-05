@@ -15,5 +15,5 @@ d = { 'settings': { 'branch': 'master',
                                                                                  'weedcrop/evaluation.py'),
                                      'weedcrop.evaluation.evaluate': ('evaluation.html#evaluate', 'weedcrop/evaluation.py')},
             'weedcrop.features': { 'weedcrop.features.extract_hog_features': ('features.html#extract_hog_features', 'weedcrop/features.py'),
-                                   'weedcrop.features.extract_lbp_features': ( 'features.html#extract_lbp_features',
-                                                                               'weedcrop/features.py')}}}
+                                   'weedcrop.features.extract_lbp_features': ('features.html#extract_lbp_features', 'weedcrop/features.py'),
+                                   'weedcrop.features.feature_fusion': ('features.html#feature_fusion', 'weedcrop/features.py')}}}
