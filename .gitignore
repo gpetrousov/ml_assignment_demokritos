@@ -3,3 +3,4 @@
 data
 *.tar
 *.zip
+logs.log
