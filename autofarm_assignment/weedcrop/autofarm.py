@@ -5,7 +5,7 @@ __all__ = ['ds_dir', 'transform', 'create_image_file_list', 'create_labels_file_
            'get_dataset_resolution_stats', 'load_image', 'resize_images', 'extract_hog_features_from_list',
            'calculate_accuracy', 'evaluate', 'extract_lbp_features', 'extract_lbp_features_from_list', 'feature_fusion',
            'test_imbalanced_forest_classifier', 'reduce_hog_features', 'extract_hsv_features_from_list',
-           'build_augmented_train_dataset']
+           'split_dataset', 'build_augmented_train_dataset', 'build_augmented_train_dataset_pipeline']
 
 # %% ../notebooks/00_baseline.ipynb 2
 import sys
@@ -412,10 +412,47 @@ transform = A.Compose([
 transform.set_random_seed(42)
 
 # %% ../notebooks/00_baseline.ipynb 199
-def build_augmented_train_dataset(X_train_orig, y_train_orig, transform, nof_transforms):
+from sklearn.model_selection import train_test_split
+
+
+def split_dataset(X_rez, y_labels, train_size=0.8):
+    """
+    Split data set in: X_train, X_test, y_train, y_test.
+    """
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_rez,
+        y_labels,
+        train_size=train_size,
+        stratify=y_labels, # Fix imbalance
+        random_state=42
+    )
+    return X_train, X_test, y_train, y_test
+
+# %% ../notebooks/00_baseline.ipynb 200
+import albumentations as A
+
+
+def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, nof_transforms=3):
+    """
+    Builds augmented training dataset on the "crop" class.
+    """
+    
     X_train_aug = []
     y_train_aug = []
-
+    
+    if not transform:
+        transform = A.Compose([
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=45, p=0.8),
+        A.HorizontalFlip(p=0.5),
+        A.VerticalFlip(p=0.5),
+        A.RandomBrightnessContrast(p=0.2),
+        A.GaussianBlur(blur_limit=(3, 5), p=0.1),
+    #     A.GaussNoise(var_limit=(10.0, 50.0), p=0.2),  
+        A.GaussNoise(std_range=(0.04, 0.2), p=0.2),
+        ])
+    transform.set_random_seed(42)
+    
     # Loop through the original split
     for img, label in zip(X_train_orig, y_train_orig):
         if label == "weed":
@@ -438,3 +475,19 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform, nof_tra
                 y_train_aug.append("crop")
                 
     return X_train_aug, y_train_aug
+
+# %% ../notebooks/00_baseline.ipynb 205
+def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, transform=None, nof_transforms=3):
+    
+    """
+    Pipeline for the augmentaiton process.
+    """
+    
+    # Split datasets
+    X_train, X_test, y_train, y_test = split_dataset(X_rez, y_labels, train_size=train_size)
+    
+    # Call augmentations
+    X_train_aug, y_train_aug = build_augmented_train_dataset(X_train, y_train, transform=transform, nof_transforms=nof_transforms)
+    
+    # Return augmented ds
+    return X_train_aug, X_test, y_train_aug, y_test
