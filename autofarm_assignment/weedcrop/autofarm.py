@@ -274,7 +274,7 @@ def extract_lbp_features(ds):
     """
     
     X_lbp_features, y_lbp_labels = [], []
-    min_width, min_height = weedcrop.dataset.find_min_dim(ds)
+    min_width, min_height = dataset.find_min_dim(ds)
     
     for i in range(len(ds)):
         img = cv2.imread(ds[i][0])
@@ -340,7 +340,7 @@ def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_spli
         X_features,
         y_labels,
         train_size=train_split,
-        stratify=y_labels, # Fix imbalance
+        stratify=y_labels, # Balances sets
         random_state=42
     )
     
@@ -428,10 +428,9 @@ def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_
     return np.array(X_hsv_features)
 
 # %% ../notebooks/00_baseline.ipynb 197
-# Build augmentation pipeline
 # Parameters as found online
 transform = A.Compose([
-    A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=45, p=0.8),
+    A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=30, p=0.2),
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
@@ -455,7 +454,7 @@ def split_dataset(X_rez, y_labels, train_size=0.8):
         X_rez,
         y_labels,
         train_size=train_size,
-        stratify=y_labels, # Fix imbalance
+        stratify=y_labels, # Balances sets
         random_state=42
     )
     return X_train, X_test, y_train, y_test
@@ -474,7 +473,7 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
     
     if not transform:
         transform = A.Compose([
-        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=45, p=0.8),
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=20, p=0.3),
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
         A.RandomBrightnessContrast(p=0.2),
