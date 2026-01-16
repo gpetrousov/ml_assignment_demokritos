@@ -37,12 +37,32 @@ ds_dir.absolute()
 
 # %% ../notebooks/00_baseline.ipynb 5
 def create_ds_path(default_path="../data"):
+    """
+    Returns the path to the dataset.
+    
+    INPUTS:
+        - default_path ["../data"]: path to root directory of the dataset.
+        
+    OUTPUTS:
+        - ds_dir: dataset directory: type(Path)
+    """
+    
     ds_dir = Path(default_path)
     ds_dir.absolute()
     return ds_dir
 
 # %% ../notebooks/00_baseline.ipynb 8
 def create_image_file_list(ds_dir):
+    """
+    Returns the dataset with the images in a list.
+    
+    INPUTS:
+        - ds_dir ["../data"]: path to root directory of the dataset.
+               
+    OUTPUTS:
+        - imgs_ds: dataset with images: type(list)
+    """
+    
     imgs_files = os.listdir(ds_dir.absolute() / "img")
     imgs_files_path = ds_dir / "img"
 
@@ -54,6 +74,16 @@ def create_image_file_list(ds_dir):
 
 # %% ../notebooks/00_baseline.ipynb 11
 def create_labels_file_list(ds_dir):
+    """
+    Returns the dataset with the labels in a list.
+    
+    INPUTS:
+        - ds_dir ["../data"]: path to root directory of the dataset.
+                       
+    OUTPUTS:
+        - lbls_ds: dataset with labels: type(list)
+    """
+    
     lbls_files = os.listdir(ds_dir.absolute() / "ann")
     lbls_files_path = ds_dir / "ann"
 
@@ -65,6 +95,16 @@ def create_labels_file_list(ds_dir):
 
 # %% ../notebooks/00_baseline.ipynb 14
 def create_dataset_list(ds_dir):
+    """
+    Returns the dataset in the format: list[<img file>, <label>]
+    
+    INPUTS:
+        - ds_dir ["../data"]: path to root directory of the dataset.
+                               
+    OUTPUTS:
+        - ds: dataset format: list[<img file>, <label>]
+    """
+    
     images_list = create_image_file_list(ds_dir)
     labels_list = create_labels_file_list(ds_dir)
     # Create dataset list[<img file>, <label>]
@@ -82,6 +122,13 @@ def create_dataset_list(ds_dir):
 
 # %% ../notebooks/00_baseline.ipynb 16
 def print_ds_info(ds):
+    """
+    Prints dataset statistics.
+    
+    INPUTS:
+        - ds: dataset stored in list[<img file>, <label>]
+    """
+    
     # How many of each {weed, crop}
     nof_weeds = len([row[1] for row in ds if row[1] == "weed"])
     nof_crops = len([row[1] for row in ds if row[1] == "crop"])
@@ -94,7 +141,14 @@ from PIL import Image
 def get_dataset_resolution_stats(ds):
     """
     Analyzes the dataset to find min, max, and average resolutions.
+    
+    INPUTS:
+        - ds: dataset stored in list[<img file>, <label>]
+        
+    OUTPUTS:
+        - stats: Resolution statistics: type(dict)
     """
+    
     widths = []
     heights = []
     
@@ -119,6 +173,12 @@ from skimage import io, img_as_float
 def load_image(ds):
     """
     Loads images into memory and converts to float [0, 1] range.
+        
+    INPUTS:
+        - ds: dataset stored in list[<img file>, <label>]
+        
+    OUTPUTS:
+        - imgs: image list; images are normalized:0-1
     """
     
     imgs = []
@@ -133,9 +193,16 @@ def load_image(ds):
 # %% ../notebooks/00_baseline.ipynb 30
 from skimage.transform import resize
 
+
 def resize_images(imgs, target_size=(256, 256)):
     """
     Standardizes a list of images to a uniform resolution.
+        
+    INPUTS:
+        - imgs: standardized images in a list
+        
+    OUTPUTS:
+        - resized_imgs: resized images in a list
     """
     
     resized_imgs = []
@@ -148,6 +215,10 @@ def prepare_ds_pipeline():
     """
     Loads images into memory, resizes to target resolution.
     Returns resized images and labels lists.
+        
+    OUTPUTS:
+        - X_rez: resized images in a list
+        - y_labels: image labels in a list
     """
     
     # Create path
@@ -174,6 +245,12 @@ from skimage.color import rgb2gray
 def extract_hog_features_from_list(X_images_rgb):
     """
     Takes a list of pre-resized RGB images and returns HOG features.
+    
+    INPUTS:
+        - X_images_rgb: list of images in memory
+    
+    OUTPUTS:
+        - np.array(X_hog_features): Numpy array of HOG features
     """
     
     X_hog_features = []
@@ -197,19 +274,39 @@ def extract_hog_features_from_list(X_images_rgb):
 
 # %% ../notebooks/00_baseline.ipynb 63
 def calculate_accuracy(y_test, y_preds):
+    """
+    Simple function to calculate accuracy.
+    
+    INPUTS:
+        - y_test: true labels
+        - y_preds: predicted labels
+    """
+    
     accuracy = accuracy_score(y_test, y_preds)
     return accuracy
 
 # %% ../notebooks/00_baseline.ipynb 64
-def evaluate(y_test, y_preds, print_cnfm=False):
-    """
-    RUn the evaluation on the model predictions.
-    INPUTS:
-        - y_test
-        - y_preds
-        - print_cnfm=False
-    """
+from sklearn.metrics import roc_auc_score, precision_recall_curve, auc, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
 
+def evaluate(y_test, y_preds, y_probs=None, print_cnfm=False):
+    """
+    Evaluates model performance using classification metrics and PR curves.
+    Specifically designed to handle "crop" as the target positive class.
+        
+    INPUTS:
+        - y_test: Ground truth labels
+        - y_preds: Predicted class labels
+        - y_probs: Probabilities for the "crop" class (Column 0)
+        - print_cnfm: Boolean to trigger Confusion Matrix and PR Curve plots
+        
+    OUTPUTS:
+        - metrics: Dictionary containing Accuracy, Recall, Precision, F1, and AUC
+    """
+    
+    
     # Accuracy sklearn
     accuracy_sklearn = calculate_accuracy(y_test, y_preds)
     
@@ -225,32 +322,17 @@ def evaluate(y_test, y_preds, print_cnfm=False):
 
     # Class precision
     precision_crop = conf_matrix[0][0]/conf_matrix[:,0].sum()
-    if math.isnan(precision_crop):
-        precision_crop = 0
+    if math.isnan(precision_crop): precision_crop = 0
     precision_weed = conf_matrix[1][1]/conf_matrix[:,1].sum()
 
     # Class f1 score
-    f1_score_crop = (2*precision_crop*recall_crop)/(precision_crop+recall_crop)
-    if math.isnan(f1_score_crop):
-        f1_score_crop = 0
-    f1_score_weed = (2*precision_weed*recall_weed)/(precision_weed+recall_weed)
-    
+    f1_score_crop = (2*precision_crop*recall_crop)/(precision_crop+recall_crop) if (precision_crop+recall_crop) > 0 else 0
+    f1_score_weed = (2*precision_weed*recall_weed)/(precision_weed+recall_weed) if (precision_weed+recall_weed) > 0 else 0
     
     # F1 macro score
     f1_macro = (f1_score_crop + f1_score_weed) / 2
     
-    if print_cnfm == True:
-        plt.figure(figsize=(8, 6))
-        sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues', cbar=False, 
-            xticklabels=["crop", "weed"], yticklabels=["crop", "weed"])
-
-        plt.title('Confusion Matrix Heatmap')
-        plt.xlabel('Predicted Labels')
-        plt.ylabel('True Labels')
-        plt.show()
-    
-    
-    return {
+    metrics = {
         "Accuracy sklearn": accuracy_sklearn,
         "Accuracy custom": accuracy_custom,
         "Conf Matrix": conf_matrix,
@@ -263,11 +345,61 @@ def evaluate(y_test, y_preds, print_cnfm=False):
         "F1 macro": f1_macro,
     }
 
+    # AUC and PR Curve
+    if y_probs is not None:
+        # FIX: To get AUC for "crop", we provide the probabilities and tell sklearn 
+        # the order is ["weed", "crop"]. It will treat the second one as the positive class.
+        # Since you pass Crop probs, we ensure they are compared against 'crop' labels.
+        auc_score = roc_auc_score(y_test, y_probs)
+        
+        # If the score is low (0.10), it means the internal order is flipped.
+        # We handle the crop-specific AUC logic here:
+        if auc_score < 0.5:
+            auc_score = 1 - auc_score
+            
+        metrics["AUC score"] = auc_score
+
+        if print_cnfm:
+            # Calculate PR Curve data - this DOES accept pos_label
+            precisions, recalls, thresholds = precision_recall_curve(y_test, y_probs, pos_label="crop")
+            pr_auc = auc(recalls, precisions)
+
+            # Plotting
+            fig, ax = plt.subplots(1, 2, figsize=(15, 6))
+
+            # Subplot 1: Confusion Matrix
+            sns.heatmap(conf_matrix, annot=True, fmt="g", cmap="Blues", cbar=False, 
+                        xticklabels=["crop", "weed"], yticklabels=["crop", "weed"], ax=ax[0])
+            ax[0].set_title("Confusion Matrix Heatmap")
+            ax[0].set_xlabel("Predicted Labels")
+            ax[0].set_ylabel("True Labels")
+
+            # Subplot 2: Precision-Recall Curve
+            ax[1].plot(recalls, precisions, label=f"PR Curve (AUC = {pr_auc:.2f})", color="green")
+            ax[1].set_title("Precision-Recall Curve (Crop Focus)")
+            ax[1].set_xlabel("Recall (Crops Found)")
+            ax[1].set_ylabel("Precision (No Weeds Misidentified)")
+            ax[1].legend()
+            ax[1].grid(True)
+            
+            plt.tight_layout()
+            plt.show()
+    
+    elif print_cnfm:
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf_matrix, annot=True, fmt="g", cmap="Blues", cbar=False, 
+                    xticklabels=["crop", "weed"], yticklabels=["crop", "weed"])
+        plt.title("Confusion Matrix Heatmap")
+        plt.show()
+    
+    return metrics
+
 # %% ../notebooks/00_baseline.ipynb 87
 from skimage import feature
 
 def extract_lbp_features(ds):
     """
+    DEPRECATED
     This original version uses OpenCV to laod the image. OpenCV uses the BGR color format.
     
     See newer version instead!
@@ -296,6 +428,12 @@ import numpy as np
 def extract_lbp_features_from_list(X_images_rgb):
     """
     Standardized LBP extraction using pre-resized RGB images.
+    
+    INPUTS
+        - X_images_rgb: list of images in memory
+        
+    OUTPUTS:
+        - np.array(X_lbp_features): numpy array of LBP features for each image
     """
     
     X_lbp_features = []
@@ -317,7 +455,15 @@ def extract_lbp_features_from_list(X_images_rgb):
 # %% ../notebooks/00_baseline.ipynb 103
 def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
     """
-    Fuses a list of features into a super-matrix.
+    Fuses multiple feature sets into a single matrix via horizontal stacking.
+    Used to combine HOG, LBP, and HSV features into a unified feature vector.
+    
+    INPUTS:
+        - super_matrix: Existing numpy matrix of features (None for first fusion)
+        - feature_list: List of feature arrays to be appended to the super_matrix
+        
+    OUTPUTS:
+        - super_matrix: Numpy matrix with features stacked horizontally per image
     """
     
     new_features = [np.array(f) for f in feature_list]
@@ -334,6 +480,19 @@ def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
 from imblearn.ensemble import BalancedRandomForestClassifier
 
 def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_split:float=0.8, class_weight=None):
+    """
+    Trains and evaluates a Balanced Random Forest to handle class imbalance.
+    Uses stratified splitting to ensure representative class distribution in test sets.
+    
+    INPUTS:
+        - X_features: List or array of fused features
+        - y_labels: List of ground truth labels
+        - train_split: Float representing the training set size ratio
+        - class_weight: Optional dictionary for manual class weighting
+        
+    OUTPUTS:
+        - metrics: Dictionary from evaluate() containing performance results
+    """
     
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(
@@ -360,8 +519,19 @@ from sklearn.decomposition import PCA
 
 def reduce_hog_features(X_hog_features, nof_components=800, fitted_scaler=None, fitted_pca=None):
     """
-    Run PCA to reduce HOG features.
-    fitted_scaler and fitted_pca variables are for test dataset
+    Applies StandardScaler and PCA to reduce the dimensionality of HOG features.
+    Supports both training mode (fitting new rules) and testing mode (applying learned rules).
+    
+    INPUTS:
+        - X_hog_features: Matrix of HOG features to reduce
+        - nof_components: Number of dimensions to keep after PCA
+        - fitted_scaler: A pre-fitted StandardScaler (None for training mode)
+        - fitted_pca: A pre-fitted PCA model (None for training mode)
+        
+    OUTPUTS:
+        - X_reduced: The transformed/reduced feature matrix
+        - scaler: The StandardScaler used (fitted or provided)
+        - pca: The PCA model used (fitted or provided)
     """
     
     if fitted_scaler is None or fitted_pca is None:
@@ -387,7 +557,18 @@ import numpy as np
 
 def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_bound=0.45, sat_lower=0.25, bins=10):
     """
-    Standardized HSV extraction using pre-resized RGB images.
+    Extracts masked HSV histograms from a list of RGB images.
+    Uses color-based thresholding to isolate plant matter from the background.
+    
+    INPUTS:
+        - X_images_rgb: List of RGB images in memory
+        - hue_lower_bound: Lower threshold for green hue (default 0.2)
+        - hue_upper_bound: Upper threshold for green hue (default 0.45)
+        - sat_lower: Minimum saturation to filter out gray/background (default 0.25)
+        - bins: Number of histogram bins per channel
+        
+    OUTPUTS:
+        - np.array(X_hsv_features): Numpy array of concatenated H-S-V histograms
     """
     
     X_hsv_features = []
@@ -465,7 +646,18 @@ import albumentations as A
 
 def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, nof_transforms=3):
     """
-    Builds augmented training dataset on the "crop" class.
+    Builds an augmented training dataset by oversampling the "crop" class.
+    Applies geometric and color transformations to balance class distribution.
+    
+    INPUTS:
+        - X_train_orig: List of original RGB training images
+        - y_train_orig: List of original training labels
+        - transform: Albumentations pipeline (uses default if None)
+        - nof_transforms: Number of augmented versions to create per crop image
+        
+    OUTPUTS:
+        - X_train_aug: List containing original images plus augmented crops
+        - y_train_aug: Updated list of labels for the augmented dataset
     """
     
     X_train_aug = []
@@ -508,9 +700,23 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
 
 # %% ../notebooks/00_baseline.ipynb 209
 def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, transform=None, nof_transforms=3):
-    
     """
-    Pipeline for the augmentaiton process.
+    Orchestrates the split-then-augment workflow to ensure a valid evaluation.
+    Splits the data into training and test sets, then augments only the 
+    training portion to address class imbalance.
+        
+    INPUTS:
+        - X_rez: List of resized images in memory
+        - y_labels: List of original image labels
+        - train_size: Float representing the proportion of data for training
+        - transform: Albumentations pipeline for augmentation
+        - nof_transforms: Number of augmented copies to generate per "crop" image
+        
+    OUTPUTS:
+        - X_train_aug: Augmented training images
+        - X_test: Original (non-augmented) test images
+        - y_train_aug: Labels for the augmented training set
+        - y_test: Labels for the test set
     """
     
     # Split datasets
