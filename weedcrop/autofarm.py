@@ -2,11 +2,12 @@
 
 # %% auto 0
 __all__ = ['ds_dir', 'transform', 'create_ds_path', 'create_image_file_list', 'create_labels_file_list', 'create_dataset_list',
-           'print_ds_info', 'get_dataset_resolution_stats', 'load_image', 'resize_images', 'prepare_ds_pipeline',
-           'extract_hog_features_from_list', 'calculate_accuracy', 'evaluate', 'extract_lbp_features',
-           'extract_lbp_features_from_list', 'feature_fusion', 'test_imbalanced_forest_classifier',
-           'reduce_hog_features', 'extract_hsv_features_from_list', 'split_dataset', 'build_augmented_train_dataset',
-           'build_augmented_train_dataset_pipeline', 'experiment_gaussian_nb']
+           'print_ds_info', 'visualize_ds_sample', 'get_dataset_resolution_stats', 'load_image', 'resize_images',
+           'prepare_ds_pipeline', 'extract_hog_features_from_list', 'calculate_accuracy', 'evaluate',
+           'extract_lbp_features', 'extract_lbp_features_from_list', 'feature_fusion',
+           'test_imbalanced_forest_classifier', 'reduce_hog_features', 'extract_hsv_features_from_list',
+           'split_dataset', 'build_augmented_train_dataset', 'build_augmented_train_dataset_pipeline',
+           'experiment_gaussian_nb']
 
 # %% ../notebooks/00_baseline.ipynb 2
 import sys
@@ -134,8 +135,36 @@ def print_ds_info(ds):
     nof_crops = len([row[1] for row in ds if row[1] == "crop"])
     print(f"Nof weed samples: {nof_weeds}")
     print(f"Nof crop samples: {nof_crops}")
+    print(f"Weeds/Crops ratio: {nof_weeds/nof_crops}")
 
-# %% ../notebooks/00_baseline.ipynb 22
+# %% ../notebooks/00_baseline.ipynb 20
+from skimage import io
+
+def visualize_ds_sample(ds):
+    """
+    Show a sample of the dataset images in Jupyter notebook.
+    """
+    
+    prev_record = ""
+    crop_records = list(np.where(np.array([s[1] for s in ds]) == "crop")[0])
+    nof_cols, nof_rows = 3, 3
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(18, 12), constrained_layout=True)
+
+    for ax in axes.flatten():
+        ax.get_yaxis().set_ticks([])
+        ax.get_xaxis().set_ticks([])
+        record = randint(0, len(ds)-1)
+        curr_record = ds[record][1]
+        if prev_record == "weed":
+            crop_record_index = randint(0, len(crop_records)-1)
+            record = crop_records[crop_record_index]
+            curr_record = ds[record][1]
+            del crop_records[crop_record_index]
+        prev_record = curr_record
+        ax.set_xlabel(xlabel=ds[record][1], fontsize=26, fontweight="bold")
+        ax.imshow(io.imread(ds[record][0]))
+
+# %% ../notebooks/00_baseline.ipynb 24
 from PIL import Image
 
 def get_dataset_resolution_stats(ds):
@@ -167,7 +196,7 @@ def get_dataset_resolution_stats(ds):
     print(f"Stats: {stats}")
     return stats
 
-# %% ../notebooks/00_baseline.ipynb 25
+# %% ../notebooks/00_baseline.ipynb 27
 from skimage import io, img_as_float
 
 def load_image(ds):
@@ -190,7 +219,7 @@ def load_image(ds):
         
     return imgs
 
-# %% ../notebooks/00_baseline.ipynb 30
+# %% ../notebooks/00_baseline.ipynb 32
 from skimage.transform import resize
 
 
@@ -210,7 +239,7 @@ def resize_images(imgs, target_size=(256, 256)):
         resized_imgs.append(resize(img, target_size, anti_aliasing=True))
     return resized_imgs
 
-# %% ../notebooks/00_baseline.ipynb 34
+# %% ../notebooks/00_baseline.ipynb 36
 def prepare_ds_pipeline():
     """
     Loads images into memory, resizes to target resolution.
@@ -238,7 +267,7 @@ def prepare_ds_pipeline():
     
     return X_rez, y_labels
 
-# %% ../notebooks/00_baseline.ipynb 43
+# %% ../notebooks/00_baseline.ipynb 45
 from skimage.feature import hog
 from skimage.color import rgb2gray
 
@@ -272,7 +301,7 @@ def extract_hog_features_from_list(X_images_rgb):
         
     return np.array(X_hog_features)
 
-# %% ../notebooks/00_baseline.ipynb 63
+# %% ../notebooks/00_baseline.ipynb 65
 def calculate_accuracy(y_test, y_preds):
     """
     Simple function to calculate accuracy.
@@ -285,7 +314,7 @@ def calculate_accuracy(y_test, y_preds):
     accuracy = accuracy_score(y_test, y_preds)
     return accuracy
 
-# %% ../notebooks/00_baseline.ipynb 64
+# %% ../notebooks/00_baseline.ipynb 66
 from sklearn.metrics import roc_auc_score, precision_recall_curve, auc, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -394,7 +423,7 @@ def evaluate(y_test, y_preds, y_probs=None, print_cnfm=False):
     
     return metrics
 
-# %% ../notebooks/00_baseline.ipynb 87
+# %% ../notebooks/00_baseline.ipynb 89
 from skimage import feature
 
 def extract_lbp_features(ds):
@@ -421,7 +450,7 @@ def extract_lbp_features(ds):
         y_lbp_labels.append(ds[i][1])
     return X_lbp_features, y_lbp_labels
 
-# %% ../notebooks/00_baseline.ipynb 90
+# %% ../notebooks/00_baseline.ipynb 92
 from skimage import feature, color
 import numpy as np
 
@@ -452,7 +481,7 @@ def extract_lbp_features_from_list(X_images_rgb):
         
     return np.array(X_lbp_features)
 
-# %% ../notebooks/00_baseline.ipynb 103
+# %% ../notebooks/00_baseline.ipynb 105
 def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
     """
     Fuses multiple feature sets into a single matrix via horizontal stacking.
@@ -476,7 +505,7 @@ def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
         
     return super_matrix
 
-# %% ../notebooks/00_baseline.ipynb 129
+# %% ../notebooks/00_baseline.ipynb 131
 from imblearn.ensemble import BalancedRandomForestClassifier
 
 def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_split:float=0.8, class_weight=None):
@@ -513,7 +542,7 @@ def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_spli
     # Evaluate
     return evaluate(y_test, y_preds, print_cnfm=True)
 
-# %% ../notebooks/00_baseline.ipynb 144
+# %% ../notebooks/00_baseline.ipynb 146
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
@@ -551,7 +580,7 @@ def reduce_hog_features(X_hog_features, nof_components=800, fitted_scaler=None, 
         
         return X_reduced
 
-# %% ../notebooks/00_baseline.ipynb 159
+# %% ../notebooks/00_baseline.ipynb 161
 from skimage import feature, color
 import numpy as np
 
@@ -608,10 +637,10 @@ def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_
         
     return np.array(X_hsv_features)
 
-# %% ../notebooks/00_baseline.ipynb 196
+# %% ../notebooks/00_baseline.ipynb 198
 import albumentations as A
 
-# %% ../notebooks/00_baseline.ipynb 197
+# %% ../notebooks/00_baseline.ipynb 199
 # Parameters as found online
 transform = A.Compose([
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=30, p=0.2),
@@ -625,7 +654,7 @@ transform = A.Compose([
 
 transform.set_random_seed(42)
 
-# %% ../notebooks/00_baseline.ipynb 203
+# %% ../notebooks/00_baseline.ipynb 205
 from sklearn.model_selection import train_test_split
 
 
@@ -643,7 +672,7 @@ def split_dataset(X_rez, y_labels, train_size=0.8):
     )
     return X_train, X_test, y_train, y_test
 
-# %% ../notebooks/00_baseline.ipynb 204
+# %% ../notebooks/00_baseline.ipynb 206
 import albumentations as A
 
 
@@ -701,7 +730,7 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
                 
     return X_train_aug, y_train_aug
 
-# %% ../notebooks/00_baseline.ipynb 209
+# %% ../notebooks/00_baseline.ipynb 211
 def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, transform=None, nof_transforms=3):
     """
     Orchestrates the split-then-augment workflow to ensure a valid evaluation.
@@ -731,10 +760,10 @@ def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, tran
     # Return augmented ds
     return X_train_aug, X_test, y_train_aug, y_test
 
-# %% ../notebooks/00_baseline.ipynb 252
+# %% ../notebooks/00_baseline.ipynb 254
 from sklearn.naive_bayes import GaussianNB
 
-# %% ../notebooks/00_baseline.ipynb 273
+# %% ../notebooks/00_baseline.ipynb 275
 def experiment_gaussian_nb(X_train, y_train, X_test, y_test, var_smoothing=0.13, sample_weight=None, name="GNB"):
     """
     Executes a specific Gaussian Naive Bayes (GNB) experiment.

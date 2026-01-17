@@ -36,4 +36,5 @@ d = { 'settings': { 'branch': 'master',
                                    'weedcrop.autofarm.resize_images': ('baseline.html#resize_images', 'weedcrop/autofarm.py'),
                                    'weedcrop.autofarm.split_dataset': ('baseline.html#split_dataset', 'weedcrop/autofarm.py'),
                                    'weedcrop.autofarm.test_imbalanced_forest_classifier': ( 'baseline.html#test_imbalanced_forest_classifier',
-                                                                                            'weedcrop/autofarm.py')}}}
+                                                                                            'weedcrop/autofarm.py'),
+                                   'weedcrop.autofarm.visualize_ds_sample': ('baseline.html#visualize_ds_sample', 'weedcrop/autofarm.py')}}}
