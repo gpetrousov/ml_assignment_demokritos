@@ -6,7 +6,7 @@ __all__ = ['ds_dir', 'transform', 'create_ds_path', 'create_image_file_list', 'c
            'extract_hog_features_from_list', 'calculate_accuracy', 'evaluate', 'extract_lbp_features',
            'extract_lbp_features_from_list', 'feature_fusion', 'test_imbalanced_forest_classifier',
            'reduce_hog_features', 'extract_hsv_features_from_list', 'split_dataset', 'build_augmented_train_dataset',
-           'build_augmented_train_dataset_pipeline']
+           'build_augmented_train_dataset_pipeline', 'experiment_gaussian_nb']
 
 # %% ../notebooks/00_baseline.ipynb 2
 import sys
@@ -727,3 +727,42 @@ def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, tran
     
     # Return augmented ds
     return X_train_aug, X_test, y_train_aug, y_test
+
+# %% ../notebooks/00_baseline.ipynb 252
+from sklearn.naive_bayes import GaussianNB
+
+# %% ../notebooks/00_baseline.ipynb 273
+def experiment_gaussian_nb(X_train, y_train, X_test, y_test, var_smoothing=0.13, sample_weight=None, name="GNB"):
+    """
+    Executes a specific Gaussian Naive Bayes (GNB) experiment.
+    Allows for tuning of the variance smoothing parameter and class-specific sample weights.
+    Gathers experimental results from grid search optimization.
+    
+    INPUTS:
+        - X_train, y_train: Training features and labels
+        - X_test, y_test: Test features and labels
+        - var_smoothing: Portion of the largest variance of all features added to variances for calculation stability
+        - sample_weight: Individual weights for training samples (used to handle class imbalance)
+        - name: Label for the specific experiment run
+        
+    OUTPUTS:
+        - metrics: Dictionary of evaluation results
+        - probs: The raw 'crop' class probabilities for threshold tuning
+    """
+    
+    # Initialize specific GNB model
+    gnb = GaussianNB(var_smoothing=var_smoothing)
+    
+    # Fit with optional sample weights
+    gnb.fit(X_train, y_train, sample_weight=sample_weight)
+    
+    # Generate predictions and probabilities
+    preds = gnb.predict(X_test)
+    # Column 0 is crop
+    probs = gnb.predict_proba(X_test)[:, 0]
+    
+    # Evaluate
+    metrics = evaluate(y_test, preds, y_probs=probs, print_cnfm=False)
+    metrics["Experiment"] = name
+    
+    return metrics, preds, probs
