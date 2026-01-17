@@ -608,6 +608,9 @@ def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_
         
     return np.array(X_hsv_features)
 
+# %% ../notebooks/00_baseline.ipynb 196
+import albumentations as A
+
 # %% ../notebooks/00_baseline.ipynb 197
 # Parameters as found online
 transform = A.Compose([
