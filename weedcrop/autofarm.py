@@ -3,11 +3,12 @@
 # %% auto 0
 __all__ = ['ds_dir', 'transform', 'create_ds_path', 'create_image_file_list', 'create_labels_file_list', 'create_dataset_list',
            'print_ds_info', 'visualize_ds_sample', 'get_dataset_resolution_stats', 'load_image', 'resize_images',
-           'prepare_ds_pipeline', 'extract_hog_features_from_list', 'calculate_accuracy', 'evaluate',
-           'extract_lbp_features', 'extract_lbp_features_from_list', 'feature_fusion',
-           'test_imbalanced_forest_classifier', 'reduce_hog_features', 'extract_hsv_features_from_list',
-           'split_dataset', 'build_augmented_train_dataset', 'build_augmented_train_dataset_pipeline',
-           'experiment_gaussian_nb']
+           'prepare_ds_pipeline', 'visualize_hog_features', 'extract_hog_features_from_list', 'calculate_accuracy',
+           'evaluate', 'extract_lbp_features', 'visualize_lbp_features', 'extract_lbp_features_from_list',
+           'feature_fusion', 'test_imbalanced_forest_classifier', 'reduce_hog_features', 'visualize_hsv_channels',
+           'visualize_hue_thresholding', 'visualize_saturation_thresholding', 'extract_hsv_features_from_list',
+           'visualize_crop_samples', 'visualize_augmented_crops', 'split_dataset', 'build_augmented_train_dataset',
+           'build_augmented_train_dataset_pipeline', 'experiment_gaussian_nb']
 
 # %% ../notebooks/00_baseline.ipynb 2
 import sys
@@ -269,6 +270,59 @@ def prepare_ds_pipeline():
 
 # %% ../notebooks/00_baseline.ipynb 45
 from skimage.feature import hog
+import cv2
+import matplotlib.pyplot as plt
+from random import sample
+
+def visualize_hog_features(ds, n_samples=3):
+    """
+    Selects random samples from the dataset and visualizes their HOG 
+    side-by-side with the original image.
+    """
+    
+    min_width, min_height = 256, 256
+    
+    # Pick random indices
+    indices = sample(range(len(ds)), n_samples)
+    
+    # Setup 3 rows and 2 columns
+    nof_cols = 2
+    nof_rows = n_samples
+    fig, axes = plt.subplots(nrows=nof_rows, ncols=nof_cols, figsize=(15, 15))
+
+    for i, axs in enumerate(axes):
+        # Extract data for the chosen sample
+        idx = indices[i]
+        img_path = ds[idx][0]
+        label = ds[idx][1]
+        
+        # Process image for HOG
+        img = cv2.imread(img_path)
+        img_resized = cv2.resize(img, (min_width, min_height))
+        img_gray = cv2.cvtColor(img_resized, cv2.COLOR_BGR2GRAY)
+        
+        _, hog_visual = hog(
+            img_gray,
+            orientations=9,
+            pixels_per_cell=(8, 8),
+            cells_per_block=(2, 2),
+            visualize=True
+        )
+        
+        # UI formatting
+        axs[0].get_yaxis().set_ticks([])
+        axs[1].get_yaxis().set_ticks([])
+        axs[0].set_xlabel(xlabel=label)
+        axs[1].set_xlabel(xlabel=label)
+        
+        # Set images (Column 0: Original, Column 1: HOG)
+        axs[0].imshow(cv2.imread(img_path))
+        axs[1].imshow(hog_visual)
+
+    plt.tight_layout()
+
+# %% ../notebooks/00_baseline.ipynb 47
+from skimage.feature import hog
 from skimage.color import rgb2gray
 
 def extract_hog_features_from_list(X_images_rgb):
@@ -301,7 +355,7 @@ def extract_hog_features_from_list(X_images_rgb):
         
     return np.array(X_hog_features)
 
-# %% ../notebooks/00_baseline.ipynb 65
+# %% ../notebooks/00_baseline.ipynb 67
 def calculate_accuracy(y_test, y_preds):
     """
     Simple function to calculate accuracy.
@@ -314,7 +368,7 @@ def calculate_accuracy(y_test, y_preds):
     accuracy = accuracy_score(y_test, y_preds)
     return accuracy
 
-# %% ../notebooks/00_baseline.ipynb 66
+# %% ../notebooks/00_baseline.ipynb 68
 from sklearn.metrics import roc_auc_score, precision_recall_curve, auc, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -423,7 +477,7 @@ def evaluate(y_test, y_preds, y_probs=None, print_cnfm=False):
     
     return metrics
 
-# %% ../notebooks/00_baseline.ipynb 89
+# %% ../notebooks/00_baseline.ipynb 91
 from skimage import feature
 
 def extract_lbp_features(ds):
@@ -450,7 +504,55 @@ def extract_lbp_features(ds):
         y_lbp_labels.append(ds[i][1])
     return X_lbp_features, y_lbp_labels
 
-# %% ../notebooks/00_baseline.ipynb 92
+# %% ../notebooks/00_baseline.ipynb 94
+from skimage.feature import local_binary_pattern
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def visualize_lbp_features(ds):
+    """
+    Visualizes LBP texture histograms side-by-side with original images.
+    """
+    
+    # 1. Setup the figure for 3 rows
+    nof_rows = 3
+    fig, axes = plt.subplots(nof_rows, 2, figsize=(12, 12))
+    plt.subplots_adjust(hspace=0.4)
+
+    # 2. Loop through 3 samples
+    for i in range(nof_rows):
+        # Load and process image
+        img_path = ds[i][0]
+        label = ds[i][1]
+        img = cv2.imread(img_path)
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Calculate LBP (Texture)
+        # P=8, R=1, 'uniform' matches extraction function
+        lbp = local_binary_pattern(img_gray, P=8, R=1, method='uniform')
+        
+        # Calculate Histogram
+        n_bins = int(lbp.max() + 1)
+        hist, _ = np.histogram(lbp.ravel(), bins=n_bins, range=(0, n_bins), density=True)
+
+        # Plot Image
+        axes[i, 0].imshow(img_rgb)
+        axes[i, 0].set_title(f"Sample {i+1}: {label}")
+        axes[i, 0].axis('off')
+
+        # Plot Histogram
+        axes[i, 1].bar(range(n_bins), hist, color='green', alpha=0.7)
+        axes[i, 1].set_title(f"LBP Histogram (10 Features)")
+        axes[i, 1].set_xlabel("Pattern Bin")
+        axes[i, 1].set_ylabel("Density")
+        axes[i, 1].set_ylim(0, 1)
+
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 96
 from skimage import feature, color
 import numpy as np
 
@@ -481,7 +583,7 @@ def extract_lbp_features_from_list(X_images_rgb):
         
     return np.array(X_lbp_features)
 
-# %% ../notebooks/00_baseline.ipynb 105
+# %% ../notebooks/00_baseline.ipynb 109
 def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
     """
     Fuses multiple feature sets into a single matrix via horizontal stacking.
@@ -505,7 +607,7 @@ def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
         
     return super_matrix
 
-# %% ../notebooks/00_baseline.ipynb 131
+# %% ../notebooks/00_baseline.ipynb 135
 from imblearn.ensemble import BalancedRandomForestClassifier
 
 def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_split:float=0.8, class_weight=None):
@@ -542,7 +644,7 @@ def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_spli
     # Evaluate
     return evaluate(y_test, y_preds, print_cnfm=True)
 
-# %% ../notebooks/00_baseline.ipynb 146
+# %% ../notebooks/00_baseline.ipynb 150
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
@@ -580,7 +682,163 @@ def reduce_hog_features(X_hog_features, nof_components=800, fitted_scaler=None, 
         
         return X_reduced
 
-# %% ../notebooks/00_baseline.ipynb 161
+# %% ../notebooks/00_baseline.ipynb 158
+from skimage.color import rgb2hsv
+import cv2
+import matplotlib.pyplot as plt
+from random import randint
+
+def visualize_hsv_channels(ds):
+    
+    """
+    Visualizes Hue and Value channels side-by-side with original RGB images.
+    """
+    
+    # 1. Setup the figure for 3 rows and 3 columns
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(12, 10))
+    plt.subplots_adjust(hspace=0.4)
+
+    for i in range(3):
+        # Load and process image
+        index = randint(0, len(ds)-1)
+        img_path = ds[index][0]
+        label = ds[index][1]
+        
+        # Extract image features
+        bgr_img = cv2.imread(img_path)
+        rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+        hsv_img = rgb2hsv(rgb_img)
+        
+        hue_img = hsv_img[:, :, 0]   # Hue channel
+        value_img = hsv_img[:, :, 2] # Value channel
+
+        # Plot RGB image
+        axes[i, 0].imshow(rgb_img)
+        axes[i, 0].set_title(f"Sample {i+1}: {label}")
+        axes[i, 0].axis("off")
+
+        # Plot Hue channel
+        axes[i, 1].imshow(hue_img, cmap="hsv")
+        axes[i, 1].set_title("Hue channel")
+        axes[i, 1].axis("off")
+        
+        # Plot Value channel
+        axes[i, 2].imshow(value_img, cmap="gray")
+        axes[i, 2].set_title("Value channel")
+        axes[i, 2].axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 162
+from skimage.color import rgb2hsv
+import cv2
+import matplotlib.pyplot as plt
+from random import sample
+
+
+def visualize_hue_thresholding(ds, hue_lower_bound=0.2, hue_upper_bound=0.45):
+    """
+    Visualizes the Hue channel histogram and the resulting binary mask
+    based on the specified green-range thresholds.
+    """
+    
+    # Setup fixed dimensions for 3 rows and 3 columns
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(12, 12))
+    plt.subplots_adjust(hspace=0.4)
+
+    # Pick 3 random indices
+    indices = sample(range(len(ds)), 3)
+
+    for i, img_index in enumerate(indices):
+        img_path = ds[img_index][0]
+        label = ds[img_index][1]
+        
+        # Extract image features
+        bgr_img = cv2.imread(img_path)
+        rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+        hsv_img = rgb2hsv(rgb_img)
+        hue_img = hsv_img[:, :, 0] # Hue channel
+        
+        # Apply filter
+        binary_img = (hue_img > hue_lower_bound) & (hue_img < hue_upper_bound)
+        
+        # Plot RGB img
+        axes[i, 0].imshow(rgb_img)
+        axes[i, 0].set_title(f"Sample {i+1}: {label}")
+        axes[i, 0].axis("off")
+        
+        # Plot Hue histogram
+        axes[i, 1].hist(hue_img.ravel(), bins=254, range=(0, 1), color='gray')
+        axes[i, 1].set_title("Hue Distribution")
+        axes[i, 1].axvspan(hue_lower_bound, hue_upper_bound, color="green", alpha=0.3, label="Plant Range")
+        axes[i, 1].set_xlim(0, 1)
+        
+        # Plot filtered image
+        axes[i, 2].imshow(binary_img, cmap='gray')
+        axes[i, 2].set_title("Green Mask")
+        axes[i, 2].axis("off")
+
+    plt.tight_layout()
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 167
+from skimage.color import rgb2hsv
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from random import sample
+
+
+def visualize_saturation_thresholding(ds, hue_lower_bound=0.2, hue_upper_bound=0.45, sat_lower=0.25):
+    """
+    Visualizes Saturation channel analysis and the final combined mask 
+    (Hue + Saturation) to isolate plant biomass from soil.
+    """
+    
+    # Setup fixed dimensions for 3 rows and 3 columns
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(15, 12))
+
+    # Pick 3 random indices
+    indices = sample(range(len(ds)), 3)
+
+    for i, img_index in enumerate(indices):
+        img_path = ds[img_index][0]
+        label = ds[img_index][1]
+        
+        # Load and convert
+        bgr_img = cv2.imread(img_path)
+        rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+        hsv_img = rgb2hsv(rgb_img)
+        
+        hue_img = hsv_img[:, :, 0]
+        sat_img = hsv_img[:, :, 1]
+        
+        # Apply Combined Filter (Hue AND Saturation)
+        # Filters for correct color range and minimum vividness
+        combined_mask = (hue_img > hue_lower_bound) & (hue_img < hue_upper_bound) & (sat_img > sat_lower)
+        
+        # 1. Plot Saturation Grayscale Image
+        axes[i, 0].imshow(sat_img, cmap="gray")
+        axes[i, 0].set_title(f"Sample {i+1} Saturation: {label}")
+        axes[i, 0].axis("off")
+
+        # 2. Plot Saturation Histogram
+        axes[i, 1].hist(sat_img.ravel(), bins=254, range=(0, 1), color="purple", alpha=0.6)
+        axes[i, 1].set_title("Saturation Histogram")
+        axes[i, 1].axvline(sat_lower, color='red', linestyle='--', label=f"Threshold: {sat_lower}")
+        axes[i, 1].set_xlim(0, 1)
+        axes[i, 1].legend()
+        
+        # 3. Plot Resulting Combined Mask
+        axes[i, 2].imshow(combined_mask, cmap="viridis")
+        axes[i, 2].set_title("Final Mask (Hue + Sat)")
+        axes[i, 2].axis("off")
+
+    fig.tight_layout()
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 171
 from skimage import feature, color
 import numpy as np
 
@@ -637,10 +895,41 @@ def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_
         
     return np.array(X_hsv_features)
 
-# %% ../notebooks/00_baseline.ipynb 198
+# %% ../notebooks/00_baseline.ipynb 207
+import matplotlib.pyplot as plt
+
+def visualize_crop_samples(train_crop_images, rows=3, cols=5):
+    """
+    Visualizes a fragment of the crop images, specifically 3 rows.
+    """
+    
+    # Force 3 rows
+    rows = rows
+    num_to_show = rows * cols
+    
+    # Slice the list to only handle what we need
+    display_images = train_crop_images[:num_to_show]
+
+    fig, axes = plt.subplots(rows, cols, figsize=(40, rows * 7))
+    axes = axes.flatten()
+
+    for i in range(num_to_show):
+        if i < len(display_images):
+            axes[i].imshow(display_images[i])
+            axes[i].set_title(f"Crop Sample: {i}", fontsize=20)
+            axes[i].axis('off')
+
+    # Hide any remaining axes if the list is shorter than rows*cols
+    for j in range(len(display_images), len(axes)):
+        axes[j].axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 210
 import albumentations as A
 
-# %% ../notebooks/00_baseline.ipynb 199
+# %% ../notebooks/00_baseline.ipynb 211
 # Parameters as found online
 transform = A.Compose([
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=30, p=0.2),
@@ -654,7 +943,36 @@ transform = A.Compose([
 
 transform.set_random_seed(42)
 
-# %% ../notebooks/00_baseline.ipynb 205
+# %% ../notebooks/00_baseline.ipynb 215
+import matplotlib.pyplot as plt
+
+def visualize_augmented_crops(train_crop_aug, n_rows=3, cols=5):
+    """
+    Visualizes a fragment of the augmented crop images.
+    Filters the input list to display only a specified number of rows.
+    """
+    
+    # Calculate total images to show based on requested rows
+    num_to_show = n_rows * cols
+    
+    # Initialize the figure with the restricted row count
+    fig, axes = plt.subplots(n_rows, cols, figsize=(40, n_rows * 7))
+    axes = axes.flatten()
+
+    for i in range(num_to_show):
+        if i < len(train_crop_aug):
+            # Accessing the "image" key from your augmentation dictionary
+            axes[i].imshow(train_crop_aug[i]["image"])
+            axes[i].set_title(f"Augmented Crop: {i}", fontsize=20)
+            axes[i].axis('off')
+        else:
+            # Hide axes if the dataset is smaller than n_rows * cols
+            axes[i].axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+# %% ../notebooks/00_baseline.ipynb 219
 from sklearn.model_selection import train_test_split
 
 
@@ -672,7 +990,7 @@ def split_dataset(X_rez, y_labels, train_size=0.8):
     )
     return X_train, X_test, y_train, y_test
 
-# %% ../notebooks/00_baseline.ipynb 206
+# %% ../notebooks/00_baseline.ipynb 220
 import albumentations as A
 
 
@@ -730,7 +1048,7 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
                 
     return X_train_aug, y_train_aug
 
-# %% ../notebooks/00_baseline.ipynb 211
+# %% ../notebooks/00_baseline.ipynb 225
 def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, transform=None, nof_transforms=3):
     """
     Orchestrates the split-then-augment workflow to ensure a valid evaluation.
@@ -760,10 +1078,10 @@ def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, tran
     # Return augmented ds
     return X_train_aug, X_test, y_train_aug, y_test
 
-# %% ../notebooks/00_baseline.ipynb 254
+# %% ../notebooks/00_baseline.ipynb 268
 from sklearn.naive_bayes import GaussianNB
 
-# %% ../notebooks/00_baseline.ipynb 275
+# %% ../notebooks/00_baseline.ipynb 289
 def experiment_gaussian_nb(X_train, y_train, X_test, y_test, var_smoothing=0.13, sample_weight=None, name="GNB"):
     """
     Executes a specific Gaussian Naive Bayes (GNB) experiment.
