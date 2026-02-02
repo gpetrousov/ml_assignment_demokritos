@@ -4,3 +4,4 @@ data
 *.tar
 *.zip
 logs.log
+.python-version
