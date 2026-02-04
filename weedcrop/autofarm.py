@@ -8,7 +8,7 @@ __all__ = ['ds_dir', 'transform', 'create_ds_path', 'create_image_file_list', 'c
            'feature_fusion', 'test_imbalanced_forest_classifier', 'reduce_hog_features', 'visualize_hsv_channels',
            'visualize_hue_thresholding', 'visualize_saturation_thresholding', 'extract_hsv_features_from_list',
            'visualize_crop_samples', 'visualize_augmented_crops', 'split_dataset', 'build_augmented_train_dataset',
-           'build_augmented_train_dataset_pipeline', 'experiment_gaussian_nb']
+           'build_augmented_train_dataset_pipeline', 'build_experimental_ds', 'experiment_gaussian_nb']
 
 # %% ../notebooks/00_baseline.ipynb 2
 import sys
@@ -477,7 +477,7 @@ def evaluate(y_test, y_preds, y_probs=None, print_cnfm=False):
     
     return metrics
 
-# %% ../notebooks/00_baseline.ipynb 91
+# %% ../notebooks/00_baseline.ipynb 73
 from skimage import feature
 
 def extract_lbp_features(ds):
@@ -504,7 +504,7 @@ def extract_lbp_features(ds):
         y_lbp_labels.append(ds[i][1])
     return X_lbp_features, y_lbp_labels
 
-# %% ../notebooks/00_baseline.ipynb 94
+# %% ../notebooks/00_baseline.ipynb 76
 from skimage.feature import local_binary_pattern
 import cv2
 import matplotlib.pyplot as plt
@@ -552,7 +552,7 @@ def visualize_lbp_features(ds):
 
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 96
+# %% ../notebooks/00_baseline.ipynb 78
 from skimage import feature, color
 import numpy as np
 
@@ -574,7 +574,7 @@ def extract_lbp_features_from_list(X_images_rgb):
         img_gray = color.rgb2gray(img_rgb)
 
         # 2. Extract LBP
-        lbp = feature.local_binary_pattern(img_gray, P=8, R=1, method='uniform')
+        lbp = feature.local_binary_pattern(img_gray.astype(dtype="int32"), P=8, R=1, method='uniform')
         
         # 3. Create Histogram (10 bins for P=8 uniform)
         lbp_hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, 11), density=True)
@@ -583,7 +583,7 @@ def extract_lbp_features_from_list(X_images_rgb):
         
     return np.array(X_lbp_features)
 
-# %% ../notebooks/00_baseline.ipynb 109
+# %% ../notebooks/00_baseline.ipynb 91
 def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
     """
     Fuses multiple feature sets into a single matrix via horizontal stacking.
@@ -607,7 +607,7 @@ def feature_fusion(super_matrix:np.ndarray=None, feature_list:list =[]):
         
     return super_matrix
 
-# %% ../notebooks/00_baseline.ipynb 135
+# %% ../notebooks/00_baseline.ipynb 117
 from imblearn.ensemble import BalancedRandomForestClassifier
 
 def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_split:float=0.8, class_weight=None):
@@ -644,7 +644,7 @@ def test_imbalanced_forest_classifier(X_features:list, y_labels:list, train_spli
     # Evaluate
     return evaluate(y_test, y_preds, print_cnfm=True)
 
-# %% ../notebooks/00_baseline.ipynb 150
+# %% ../notebooks/00_baseline.ipynb 132
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
@@ -682,7 +682,7 @@ def reduce_hog_features(X_hog_features, nof_components=800, fitted_scaler=None, 
         
         return X_reduced
 
-# %% ../notebooks/00_baseline.ipynb 158
+# %% ../notebooks/00_baseline.ipynb 140
 from skimage.color import rgb2hsv
 import cv2
 import matplotlib.pyplot as plt
@@ -730,7 +730,7 @@ def visualize_hsv_channels(ds):
     plt.tight_layout()
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 162
+# %% ../notebooks/00_baseline.ipynb 144
 from skimage.color import rgb2hsv
 import cv2
 import matplotlib.pyplot as plt
@@ -782,7 +782,7 @@ def visualize_hue_thresholding(ds, hue_lower_bound=0.2, hue_upper_bound=0.45):
     plt.tight_layout()
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 167
+# %% ../notebooks/00_baseline.ipynb 149
 from skimage.color import rgb2hsv
 import cv2
 import matplotlib.pyplot as plt
@@ -838,7 +838,7 @@ def visualize_saturation_thresholding(ds, hue_lower_bound=0.2, hue_upper_bound=0
     fig.tight_layout()
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 171
+# %% ../notebooks/00_baseline.ipynb 153
 from skimage import feature, color
 import numpy as np
 
@@ -895,7 +895,7 @@ def extract_hsv_features_from_list(X_images_rgb, hue_lower_bound=0.2, hue_upper_
         
     return np.array(X_hsv_features)
 
-# %% ../notebooks/00_baseline.ipynb 207
+# %% ../notebooks/00_baseline.ipynb 190
 import matplotlib.pyplot as plt
 
 def visualize_crop_samples(train_crop_images, rows=3, cols=5):
@@ -926,10 +926,10 @@ def visualize_crop_samples(train_crop_images, rows=3, cols=5):
     plt.tight_layout()
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 210
+# %% ../notebooks/00_baseline.ipynb 193
 import albumentations as A
 
-# %% ../notebooks/00_baseline.ipynb 211
+# %% ../notebooks/00_baseline.ipynb 194
 # Parameters as found online
 transform = A.Compose([
     A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.1, rotate_limit=30, p=0.2),
@@ -943,7 +943,7 @@ transform = A.Compose([
 
 transform.set_random_seed(42)
 
-# %% ../notebooks/00_baseline.ipynb 215
+# %% ../notebooks/00_baseline.ipynb 198
 import matplotlib.pyplot as plt
 
 def visualize_augmented_crops(train_crop_aug, n_rows=3, cols=5):
@@ -972,7 +972,7 @@ def visualize_augmented_crops(train_crop_aug, n_rows=3, cols=5):
     plt.tight_layout()
     plt.show()
 
-# %% ../notebooks/00_baseline.ipynb 219
+# %% ../notebooks/00_baseline.ipynb 202
 from sklearn.model_selection import train_test_split
 
 
@@ -990,7 +990,7 @@ def split_dataset(X_rez, y_labels, train_size=0.8):
     )
     return X_train, X_test, y_train, y_test
 
-# %% ../notebooks/00_baseline.ipynb 220
+# %% ../notebooks/00_baseline.ipynb 203
 import albumentations as A
 
 
@@ -1020,7 +1020,6 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
         A.VerticalFlip(p=0.5),
         A.RandomBrightnessContrast(p=0.2),
         A.GaussianBlur(blur_limit=(3, 5), p=0.1),
-    #     A.GaussNoise(var_limit=(10.0, 50.0), p=0.2),  
         A.GaussNoise(std_range=(0.04, 0.2), p=0.2),
         ])
     transform.set_random_seed(42)
@@ -1048,7 +1047,7 @@ def build_augmented_train_dataset(X_train_orig, y_train_orig, transform=None, no
                 
     return X_train_aug, y_train_aug
 
-# %% ../notebooks/00_baseline.ipynb 225
+# %% ../notebooks/00_baseline.ipynb 208
 def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, transform=None, nof_transforms=3):
     """
     Orchestrates the split-then-augment workflow to ensure a valid evaluation.
@@ -1078,10 +1077,63 @@ def build_augmented_train_dataset_pipeline(X_rez, y_labels, train_size=0.8, tran
     # Return augmented ds
     return X_train_aug, X_test, y_train_aug, y_test
 
-# %% ../notebooks/00_baseline.ipynb 268
+# %% ../notebooks/00_baseline.ipynb 245
+def build_experimental_ds():
+    """
+    Orchestrates the end-to-end pipeline to create a fused, augmented, and reduced dataset.
+    This function handles resizing, train-test splitting, data augmentation for crops, 
+    multi-modal feature extraction (HOG, LBP, HSV), and dimensionality reduction via PCA.
+    
+    INPUTS:
+        - None (Uses global configuration and hard-coded pipeline calls)
+        
+    OUTPUTS:
+        - X_train_combined: Final fused feature matrix for the augmented training set
+        - y_train_aug: Labels for the augmented training set
+        - X_test_combined: Final fused feature matrix for the original test set
+        - y_test: Labels for the test set
+    """
+    
+    # Resize
+    X_rez, y_labels = prepare_ds_pipeline()
+
+    # >>> Train DS setup <<<
+    # Augment train ds crops only
+    X_train_aug, X_test, y_train_aug, y_test = build_augmented_train_dataset_pipeline(X_rez, y_labels)
+
+    # Feature extraction on training ds
+    X_train_hog = extract_hog_features_from_list(X_train_aug)
+    X_train_lbp = extract_lbp_features_from_list(X_train_aug)
+    X_train_hsv = extract_hsv_features_from_list(X_train_aug)
+
+    # PCA on HOG
+    X_train_hog_reduced, scaler, pca = reduce_hog_features(X_train_hog)
+
+    # Combine
+    X_train_combined = feature_fusion(feature_list=[X_train_lbp, X_train_hog_reduced, X_train_hsv])
+
+    # Cleanup to avoid mem bomb
+    del X_train_hog, X_train_lbp, X_train_hsv, X_train_aug, X_train_hog_reduced
+    gc.collect()
+
+    # >>> Test DS setup <<<
+    # Feature extraction on test ds
+    X_test_hog = extract_hog_features_from_list(X_test)
+    X_test_lbp = extract_lbp_features_from_list(X_test)
+    X_test_hsv = extract_hsv_features_from_list(X_test)
+
+    # PCA on HOG
+    X_test_hog_reduced = reduce_hog_features(X_test_hog, fitted_scaler=scaler, fitted_pca=pca)
+
+    # Combine
+    X_test_combined = feature_fusion(feature_list=[X_test_lbp, X_test_hog_reduced, X_test_hsv])
+
+    return X_train_combined, y_train_aug, X_test_combined, y_test
+
+# %% ../notebooks/00_baseline.ipynb 251
 from sklearn.naive_bayes import GaussianNB
 
-# %% ../notebooks/00_baseline.ipynb 289
+# %% ../notebooks/00_baseline.ipynb 272
 def experiment_gaussian_nb(X_train, y_train, X_test, y_test, var_smoothing=0.13, sample_weight=None, name="GNB"):
     """
     Executes a specific Gaussian Naive Bayes (GNB) experiment.
