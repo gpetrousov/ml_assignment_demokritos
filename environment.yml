@@ -1,0 +1,17 @@
+name: "ml_clean"
+channels:
+  - "conda-forge"
+  - "defaults"
+dependencies:
+  - "python=3.10.13"
+  - "pip=23.2.1"
+  - "pip:"
+    - "numpy==1.26.4"
+    - "matplotlib==3.7.2"
+    - "scikit-learn==1.4.2"
+    - "scikit-image==0.25.2"
+    - "imbalanced-learn==0.14.1"
+    - "pandas==2.1.4"
+    - "pillow==12.0.0"
+    - "qrcode==8.2"
+    - "rise==5.7.1"
