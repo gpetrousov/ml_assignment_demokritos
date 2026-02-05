@@ -75,3 +75,23 @@ If you need to watch the presentation.
 jupyter-nbextension install rise --py --sys-prefix
 jupyter-nbextension enable rise --py --sys-prefix
 ```
+
+## 📚 Dataset
+
+If you need to run the notebooks, you need to have the dataset in the root directory of the repo.
+
+- https://datasetninja.com/dataset-of-annotated-food-crops-and-weed-images
+
+```text
+@article{SUDARS2020105833,
+  title = {Dataset of annotated food crops and weed images for robotic computer vision control},
+  journal = {Data in Brief},
+  volume = {31},
+  pages = {105833},
+  year = {2020},
+  issn = {2352-3409},
+  doi = {[https://doi.org/10.1016/j.dib.2020.105833](https://doi.org/10.1016/j.dib.2020.105833)},
+  url = {[https://www.sciencedirect.com/science/article/pii/S2352340920307277](https://www.sciencedirect.com/science/article/pii/S2352340920307277)},
+  author = {Kaspars Sudars and Janis Jasko and Ivars Namatevs and Liva Ozola and Niks Badaukis},
+}
+```
