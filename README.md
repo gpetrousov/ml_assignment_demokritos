@@ -1,35 +1,77 @@
-# Team SGD Machine Learning assignment
+# Autofarming: Weed Control Repository
 
-Proposals: https://drive.google.com/drive/folders/1KCzNR4mxJCMpJDNw9fguZJJfahz9aPc1?usp=sharing
+**MSc in Artificial Intelligence** | **NCSR Demokritos & University of Piraeus**
+**Course:** Machine Learning
+**Student:** Ioannis Petrousov
 
-## Project 1: Predicting Pit Stop Duration ⏱️
+## 🎯 Repository Purpose
+This repository contains a Python-based machine learning pipeline for agricultural image classification. It integrates feature extraction (HOG, LBP, HSV), data augmentation, and classification models to identify crops and weeds in field images.
 
-- Goal: Predict the total duration of a pit stop (in seconds) based on pre-stop conditions.
-- Correlate with pit stop videos.
+## 🚀 Key Business Impact
+Our optimized models translate statistical performance into real-world agricultural value:
+* **Crop Preservation Rate:** The system identifies **91.7%** of all crops, ensuring harvestable products are protected.
+* **Weed Suppression Efficiency:** Successfully flags and rejects **85.2%** of weeds, significantly reducing competition for soil nutrients.
+* **Operational Reliability:** When a plant is flagged as a weed, the model is **99.5%** accurate, minimizing the risk of accidental crop destruction.
 
+## 📂 Repository Structure
+```text
+├── notebooks/
+│   ├── 00_baseline.ipynb       # Research logic and experimental sandbox
+│   └── 01_report.ipynb         # End-to-end classification pipeline & RISE Presentation
+├── weedcrop/                   # Module Source package
+│   ├── autofarm.py             # Core library logic (Extraction, Training, Eval)
+│   └── ...
+├── requirements.txt            # Pip dependencies
+├── environment.yml             # Conda dependencies
+└── README.md                   # Repository documentation
+```
 
-## Directory: `f1_assignment`
+## ⚙️ Environment Setup
 
+To reproduce the environment, ensure you have Python 3.10+ installed.
 
-### Goals outline
+1. Clone the Repository
 
-#### Primary
+```bash
+git clone "[https://github.com/gpetrousov/ml_assignment_demokritos.git](https://github.com/gpetrousov/ml_assignment_demokritos.git)"
+cd "ml_assignment_demokritos"
+```
 
-- [ ] Library to build `DataFrame` for GP races
-- [ ] Library to add race telemetry to `DataFrame`
-- [ ] Regression model for all GP races concatenated
-- [ ] Regression model per GP race
-- [ ] Regression model per team (for a F1 strategist)
+2. Set Python Version (Pyenv)
 
-#### Secondaries - Exploratory
+To match the experimental environment, it is recommended to use Python 3.10.13:
 
-- [ ] Train Forest model for pit stop timeframe classification
-- [ ] Train a neural net and correlate with statistical model
+```bash
+pyenv install 3.10.13
+pyenv local 3.10.13
+```
 
-#### Outcomes
+3. Install Dependencies (Pip)
 
-- [ ] Attempt to predict pit stop time accuracy as close as possible.
-- [ ] Library which builds the `DataFrame` on top of `fastF1`.
-- [ ] Find properties affecting accuracy the most.
-- [ ] Compare results to a neural network.
+```bash
+pip install -r "requirements.txt"
+```
 
+4. Create and Activate the Conda Environment
+
+```bash
+conda env create -f "environment.yml"
+conda activate "ml_clean"
+```
+
+5. Launch the Notebook(s)
+
+Run the notebook and ensure the ml_clean kernel is selected:
+
+```bash
+jupyter notebook notebooks/01_report.ipynb
+```
+
+6. Optional: Enable RISE Presentation
+
+If you need to watch the presentation.
+
+```bash
+jupyter-nbextension install rise --py --sys-prefix
+jupyter-nbextension enable rise --py --sys-prefix
+```
