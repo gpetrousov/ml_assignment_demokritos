@@ -53,4 +53,8 @@ d = { 'settings': { 'branch': 'master',
                                    'weedcrop.autofarm.visualize_lbp_features': ( 'baseline.html#visualize_lbp_features',
                                                                                  'weedcrop/autofarm.py'),
                                    'weedcrop.autofarm.visualize_saturation_thresholding': ( 'baseline.html#visualize_saturation_thresholding',
-                                                                                            'weedcrop/autofarm.py')}}}
+                                                                                            'weedcrop/autofarm.py')},
+            'weedcrop.optimizer': { 'weedcrop.optimizer.run_gnb_optimization_and_evaluation': ( 'report.html#run_gnb_optimization_and_evaluation',
+                                                                                                'weedcrop/optimizer.py')},
+            'weedcrop.report': { 'weedcrop.report.run_gnb_optimization_and_evaluation': ( 'report.html#run_gnb_optimization_and_evaluation',
+                                                                                          'weedcrop/report.py')}}}
