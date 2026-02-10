@@ -55,6 +55,4 @@ d = { 'settings': { 'branch': 'master',
                                    'weedcrop.autofarm.visualize_saturation_thresholding': ( 'baseline.html#visualize_saturation_thresholding',
                                                                                             'weedcrop/autofarm.py')},
             'weedcrop.optimizer': { 'weedcrop.optimizer.run_gnb_optimization_and_evaluation': ( 'report.html#run_gnb_optimization_and_evaluation',
-                                                                                                'weedcrop/optimizer.py')},
-            'weedcrop.report': { 'weedcrop.report.run_gnb_optimization_and_evaluation': ( 'report.html#run_gnb_optimization_and_evaluation',
-                                                                                          'weedcrop/report.py')}}}
+                                                                                                'weedcrop/optimizer.py')}}}
