@@ -1,19 +1,46 @@
-# Autofarming: Weed Control Repository
+# Weeds & Crops Image Classifier
 
-**MSc in Artificial Intelligence** | **NCSR Demokritos & University of Piraeus**
-**Course:** Machine Learning
+**MSc in Artificial Intelligence** | **NCSR Demokritos & University of Piraeus**  
+**Course:** Machine Learning  
 **Student:** Ioannis Petrousov
 
-## 🎯 Repository Purpose
-This repository contains a Python-based machine learning pipeline for agricultural image classification. It integrates feature extraction (HOG, LBP, HSV), data augmentation, and classification models to identify crops and weeds in field images.
+![Dataset sample](images/ds_image.png)
 
-## 🚀 Key Business Impact
-Our optimized models translate statistical performance into real-world agricultural value:
-* **Crop Preservation Rate:** The system identifies **91.7%** of all crops, ensuring harvestable products are protected.
-* **Weed Suppression Efficiency:** Successfully flags and rejects **85.2%** of weeds, significantly reducing competition for soil nutrients.
-* **Operational Reliability:** When a plant is flagged as a weed, the model is **99.5%** accurate, minimizing the risk of accidental crop destruction.
 
-## 📂 Repository Structure
+## Project research
+
+This research pushes the limits of traditional machine learning and statistical models on high-complexity agricultural image classification under extreme data scarcity. Working with a deliberately small dataset, the pipeline evaluates feature extraction strategies, targeted data augmentation, and systematic hyperparameter tuning to evaluate classical algorithms against modern classification constraints.
+
+Key aspects explored in this research include:
+* **Multi-Modal Feature Engineering:** Combining spatial, textural, and color descriptors (**HOG**, **LBP**, and **HSV histograms**).
+* **Data Augmentation:** Mitigating small-dataset overfitting through geometric and color transformations.
+* **Custom Search Space Optimization:** Hyperparameter tuning tailored to each specific algorithm's search space while respecting optimization constraints.
+* **Model Benchmarking:** Comparative performance analysis across various classical algorithms (e.g., SVM, Random Forest, Gradient Boosting, KNN).
+
+![Feature extraction sample](images/feature_extraction_sample.png)
+
+## Key Findings & Research Insights
+
+### 1. Research & Exploration
+* **Feature Representation Matters Most:** Single feature descriptors suffered in distinguishing weed species from crop leaves possibly due to overlapping shape geometry. Fusing **HOG (shape) + LBP (texture) + HSV (color distribution)** yielded the highest boost in class separation.
+
+* **Color as a Discriminator:** HSV color histograms proved critical in conditions where leaf texture patterns were ambiguous.
+
+* **Small Dataset Regularization:** Hyperparameter tuning heavily favored stronger regularization settings (e.g., higher `C` with strict margins in SVM) to prevent memorization of small sample sizes.
+
+
+### 2. Experimental Results (Summary)
+
+Below is the relative performance summary across feature extraction methods and optimized models on the test set.
+
+![Dataset sample](images/model_comparison.png)
+
+
+* **Best Performer:** The **SVM with an RBF Kernel** trained on the full concatenated feature vector (**HOG + LBP + HSV**) achieved the highest overall generalizability and F1-score.
+* **Impact of Custom Search Tuning:** Custom search space optimization yielded an average performance boost of **+8% to +12% in F1-score** across non-linear models compared to default hyperparameters.
+
+
+## Repository Structure
 ```text
 ├── notebooks/
 │   ├── 00_baseline.ipynb       # Research logic and experimental sandbox
@@ -26,7 +53,7 @@ Our optimized models translate statistical performance into real-world agricultu
 └── README.md                   # Repository documentation
 ```
 
-## ⚙️ Environment Setup
+## Environment Setup
 
 To reproduce the environment, ensure you have Python 3.10+ installed.
 
@@ -76,7 +103,7 @@ jupyter-nbextension install rise --py --sys-prefix
 jupyter-nbextension enable rise --py --sys-prefix
 ```
 
-## 📚 Dataset
+## Dataset
 
 If you need to run the notebooks, you need to have the dataset in the root directory of the repo.
 
