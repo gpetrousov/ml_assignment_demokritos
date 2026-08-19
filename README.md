@@ -2,7 +2,8 @@
 
 **MSc in Artificial Intelligence** | **NCSR Demokritos & University of Piraeus**  
 **Course:** Machine Learning  
-**Student:** Ioannis Petrousov
+**Student:** Ioannis Petrousov  
+**Live Demo:** [https://autofarm.petrousoft.com/](https://autofarm.petrousoft.com/)
 
 ![Dataset sample](images/ds_image.png)
 
